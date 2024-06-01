@@ -58,13 +58,13 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
   role       = aws_iam_role.cluster_eks_role.name
 }
 
-# Node Group
+# Node Groups
 
-resource "aws_eks_node_group" "primary" {
+resource "aws_eks_node_group" "primary_1a" {
   cluster_name    = aws_eks_cluster.primary.name
-  node_group_name = "primary"
+  node_group_name = "primary-1a"
   node_role_arn   = aws_iam_role.cluster_eks_role.arn
-  subnet_ids      = aws_subnet.eks-1[*].id
+  subnet_ids      = [aws_subnet.eks-1a.id]
 
   scaling_config {
     desired_size = 1
@@ -72,7 +72,33 @@ resource "aws_eks_node_group" "primary" {
     min_size     = 1
   }
 
-  instance_types = "t4g.nano"
+  instance_types = ["t4g.nano"]
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  depends_on = [
+    aws_eks_cluster.primary,
+    aws_iam_role_policy_attachment.AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
+
+resource "aws_eks_node_group" "primary_1b" {
+  cluster_name    = aws_eks_cluster.primary.name
+  node_group_name = "primary-1b"
+  node_role_arn   = aws_iam_role.cluster_eks_role.arn
+  subnet_ids      = [aws_subnet.eks-1b.id]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 1
+    min_size     = 1
+  }
+
+  instance_types = ["t4g.nano"]
 
   update_config {
     max_unavailable = 1
